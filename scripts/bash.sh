@@ -30,3 +30,12 @@ alias ga='git add .'
 alias gs='lazygit'
 alias gp='git push'
 
+
+n() {
+  if [ $# -eq 0 ]; then
+    nvim .
+  else
+    nvim "$@"
+  fi
+}
+

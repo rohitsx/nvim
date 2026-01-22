@@ -53,6 +53,5 @@ map("i", "<CR>", function()
   end
 end, { expr = true, noremap = true, silent = true })
 
--- In terminal mode, make <Esc> go to Normal mode
-map("t", "<Esc>", [[<C-\><C-n>]], { noremap = true, silent = true })
 require("config.terminal")
+

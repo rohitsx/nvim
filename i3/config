@@ -1,5 +1,5 @@
 set $mod Mod4
-font pango:FiraCode Nerd Font 8
+font pango:Fira code 10
 
 
 floating_modifier $mod
@@ -14,9 +14,5 @@ exec --no-startup-id picom --config ~/.config/picom/picom.conf
 # redshift for night light
 exec --no-startup-id redshift -P
 
-#wallpaper
-exec_always --no-startup-id feh --bg-scale ~/.dotFiles/.wallpaper/wallpaper.jpg
-
 #set brightness to 0
-exec --no-startup-id brightnessctl set 1%
-
+exec --no-startup-id brightnessctl set 0%

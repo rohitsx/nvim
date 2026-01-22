@@ -7,7 +7,29 @@ return {
     config = function()
       require("nvim-treesitter.configs").setup({
         modules = {},
-        ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" },
+        ensure_installed = {
+          -- Core
+          "lua",
+          "vim",
+          "vimdoc",
+          "query",
+          "markdown",
+          "markdown_inline",
+
+          -- Web / JS ecosystem
+          "javascript",
+          "typescript",
+          "tsx",
+          "json",
+          "html",
+          "css",
+
+          -- Optional but useful:
+          "bash",
+          "yaml",
+          "toml",
+        },
+
         sync_install = false,
         auto_install = true,
         ignore_install = {},
