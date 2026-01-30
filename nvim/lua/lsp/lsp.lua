@@ -1,6 +1,7 @@
 return {
   {
     "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
     dependencies = {
       {
         "folke/lazydev.nvim",
@@ -11,121 +12,90 @@ return {
           },
         },
       },
+      "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
-      -- local capabilities = require("cmp_nvim_lsp").default_capabilities()
       local lspconfig = require("lspconfig")
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      -- lspconfig.denols.setup {}
-      lspconfig.ts_ls.setup({
-        root_dir = require("lspconfig").util.root_pattern("package.json", "tsconfig.json"),
-        settings = {
-          typescript = {
-            tsserver = {
-              maxTsServerMemory = 4096, -- Give TS more memory (works wonders)
-            },
-          },
-          javascript = {
-            tsserver = {
-              maxTsServerMemory = 4096,
-            },
-          },
-        },
+      local on_attach = function(client, bufnr)
+        local opts = { buffer = bufnr, silent = true }
+        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+        vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+        vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
 
-        -- init_options = {
-        --   preferences = {
-        --     disableSuggestions = true, -- Speed up completions
-        --   },
-        -- },
-
-        on_attach = function(client)
-          -- Disable semantic tokens (HUGE performance boost)
+        if client.name == "ts_ls" then
           client.server_capabilities.semanticTokensProvider = nil
-        end,
+        end
+      end
+
+      -- TypeScript / JavaScript
+      lspconfig.ts_ls.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = {
+          typescript = { tsserver = { maxTsServerMemory = 4096 } },
+          javascript = { tsserver = { maxTsServerMemory = 4096 } },
+        },
       })
-      lspconfig.lua_ls.setup {}
-      lspconfig.pyright.setup {}
-      lspconfig.stylelint_lsp.setup {}
-      lspconfig.svelte.setup {}
-      lspconfig.bashls.setup {}
-      lspconfig.cssls.setup {}
-      lspconfig.jsonls.setup {}
-      lspconfig.stylelint_lsp.setup {}
-      lspconfig.tailwindcss.setup {
+
+      -- Simple servers
+      local servers = {
+        "lua_ls",
+        "pyright",
+        "stylelint_lsp",
+        "svelte",
+        "bashls",
+        "cssls",
+        "jsonls",
+      }
+
+      for _, server in ipairs(servers) do
+        lspconfig[server].setup({
+          capabilities = capabilities,
+          on_attach = on_attach,
+        })
+      end
+
+      -- TailwindCSS with custom regex
+      lspconfig.tailwindcss.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
         settings = {
           tailwindCSS = {
             experimental = {
               classRegex = {
-                { "tw`([^`]*)",    ".*" }, -- tw`...`
-                { "tw%(([^)]*)%)", ".*" }, -- tw("...")
+                { "tw`([^`]*)", ".*" },
+                { "tw%(([^)]*)%)", ".*" },
               },
             },
           },
         },
-      }
+      })
 
-      -- Format current buffer with LSP
-      -- vim.keymap.set("n", "<leader>f", function() vim.lsp.buf.format() end)
-
-      -- Enable virtual text for diagnostics (inline error/warning messages)
+      -- Diagnostics & keymaps
       vim.diagnostic.config({ virtual_text = true })
-      vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostics" })
-
-      -- Completion settings to prevent auto-selecting the first item
-      -- vim.opt.completeopt = { "menu", "menuone", "noselect" }
-      --
-      -- -- Auto command for when LSP attaches to a buffer
-      -- vim.api.nvim_create_autocmd('LspAttach', {
-      --   callback = function(args)
-      --     -- Enable auto-completion if supported
-      --     local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
-      --     if client:supports_method('textDocument/completion') then
-      --       -- Optional: trigger autocompletion on EVERY keypress. May be slow!
-      --       local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
-      --       client.server_capabilities.completionProvider.triggerCharacters = chars
-      --
-      --       -- Enable LSP completion with autotrigger
-      --       vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
-      --     end
-      --   end,
-      -- })
+      vim.keymap.set(
+        "n",
+        "<leader>d",
+        vim.diagnostic.open_float,
+        { desc = "Show diagnostics" }
+      )
     end,
   },
 
-  -- {
-  --   "stevearc/conform.nvim",
-  --   opts = {
-  --     formatters_by_ft = {
-  --       lua = { "stylua" },
-  --       javascript = { "prettier" },
-  --       typescript = { "prettier" },
-  --       svelte = { "prettier" },
-  --       css = { "prettier" },
-  --       html = { "prettier" },
-  --       python = { "black" },
-  --       sh = { "shfmt" },
-  --     },
-  --   },
-  --   config = function(_, opts)
-  --     local conform = require("conform")
-  --     conform.setup(opts)
-  --
-  --     -- Override <leader>f to use conform with LSP fallback
-  --     vim.keymap.set("n", "<leader>f", function()
-  --       conform.format({ async = true, lsp_fallback = true })
-  --     end, { desc = "Format file" })
-  --   end,
-  -- },
-  --
+  -- Snippets
   {
     "L3MON4D3/LuaSnip",
     dependencies = { "rafamadriz/friendly-snippets" },
     config = function()
-      require("luasnip.loaders.from_vscode").lazy_load() -- Load snippets lazily
+      require("luasnip.loaders.from_vscode").lazy_load()
     end,
   },
 
-  -- nvim-cmp
+  -- Completion
   {
     "hrsh7th/nvim-cmp",
     event = "InsertEnter",
@@ -138,42 +108,38 @@ return {
       local cmp = require("cmp")
 
       cmp.setup({
-        -- Snippet expansion
         snippet = {
           expand = function(args)
             require("luasnip").lsp_expand(args.body)
           end,
         },
-        -- Minimal completion settings for speed
         completion = {
           completeopt = "menu,menuone,noselect",
-          keyword_length = 1, -- Trigger completion after 1 character
+          keyword_length = 1,
         },
-        -- Minimal mappings for speed
         mapping = cmp.mapping.preset.insert({
-          ["<C-j>"] = cmp.mapping.select_next_item(),        -- Navigate down
-          ["<C-k>"] = cmp.mapping.select_prev_item(),        -- Navigate up
-          ["<C-Space>"] = cmp.mapping.complete(),            -- Trigger completion
-          ["<C-e>"] = cmp.mapping.abort(),                   -- Close completion menu
-          ["<CR>"] = cmp.mapping.confirm({ select = true }), -- Confirm selection
+          ["<C-j>"] = cmp.mapping.select_next_item(),
+          ["<C-k>"] = cmp.mapping.select_prev_item(),
+          ["<C-Space>"] = cmp.mapping.complete(),
+          ["<C-e>"] = cmp.mapping.abort(),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }),
         }),
-        -- Minimal sources for speed
         sources = {
-          { name = "nvim_lsp", max_item_count = 10 }, -- Limit LSP suggestions
-          { name = "luasnip",  max_item_count = 5 },  -- Limit snippet suggestions
+          { name = "nvim_lsp", max_item_count = 10 },
+          { name = "luasnip", max_item_count = 5 },
         },
-        -- Disable heavy formatting for speed
         formatting = {
-          fields = { "abbr", "kind" }, -- Show only abbreviation and kind
-          format = function(_, vim_item)
-            vim_item.menu = nil        -- Remove menu to reduce clutter
-            return vim_item
+          fields = { "abbr", "kind" },
+          format = function(_, item)
+            item.menu = nil
+            return item
           end,
         },
       })
     end,
   },
 
+  -- Formatting
   {
     "stevearc/conform.nvim",
     opts = {
@@ -188,10 +154,10 @@ return {
     config = function(_, opts)
       local conform = require("conform")
       conform.setup(opts)
+
       vim.keymap.set("n", "<leader>f", function()
         conform.format({ async = true, lsp_fallback = true })
       end, { desc = "Format file" })
     end,
-  }
-
+  },
 }

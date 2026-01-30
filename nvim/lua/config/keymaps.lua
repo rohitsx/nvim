@@ -31,19 +31,6 @@ map("n", "<A-j>", "<cmd>resize -2<CR>", opts)          -- shrink vertically
 map("n", "<A-k>", "<cmd>resize +2<CR>", opts)          -- expand vertically
 map("n", "<A-=>", "<C-w>=", opts)                      -- equalize window sizes
 
--- map("i", "<CR>", function()
---   if vim.fn.pumvisible() == 1 then
---     return "<C-y>"
---   else
---     local ok, autopairs = pcall(require, "nvim-autopairs")
---     if ok then
---       return autopairs.autopairs_cr()
---     else
---       return "<CR>"
---     end
---   end
--- end, { expr = true, noremap = true, silent = true })
-
 -- Use <Enter> to confirm item in popup instead of <C-y>
 map("i", "<CR>", function()
   if vim.fn.pumvisible() == 1 then
