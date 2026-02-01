@@ -1,4 +1,5 @@
 return {
+  -- LSP Config
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
@@ -15,7 +16,6 @@ return {
       "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
-      local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
       local on_attach = function(client, bufnr)
@@ -25,14 +25,30 @@ return {
         vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
         vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-
-        if client.name == "ts_ls" then
-          client.server_capabilities.semanticTokensProvider = nil
-        end
       end
 
+      -- Helper function to register & enable a server
+      local function setup_server(name, opts)
+        vim.lsp.config(name, opts)
+        vim.lsp.enable(name)
+      end
+
+      -- Lua LSP
+      setup_server("lua_ls", {
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = {
+          Lua = {
+            diagnostics = { globals = { "vim" } },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+            },
+          },
+        },
+      })
+
       -- TypeScript / JavaScript
-      lspconfig.ts_ls.setup({
+      setup_server("ts_ls", {
         capabilities = capabilities,
         on_attach = on_attach,
         settings = {
@@ -41,9 +57,8 @@ return {
         },
       })
 
-      -- Simple servers
-      local servers = {
-        "lua_ls",
+      -- Other servers
+      local other_servers = {
         "pyright",
         "stylelint_lsp",
         "svelte",
@@ -52,15 +67,12 @@ return {
         "jsonls",
       }
 
-      for _, server in ipairs(servers) do
-        lspconfig[server].setup({
-          capabilities = capabilities,
-          on_attach = on_attach,
-        })
+      for _, server in ipairs(other_servers) do
+        setup_server(server, { capabilities = capabilities, on_attach = on_attach })
       end
 
       -- TailwindCSS with custom regex
-      lspconfig.tailwindcss.setup({
+      setup_server("tailwindcss", {
         capabilities = capabilities,
         on_attach = on_attach,
         settings = {
@@ -75,14 +87,9 @@ return {
         },
       })
 
-      -- Diagnostics & keymaps
+      -- Diagnostics
       vim.diagnostic.config({ virtual_text = true })
-      vim.keymap.set(
-        "n",
-        "<leader>d",
-        vim.diagnostic.open_float,
-        { desc = "Show diagnostics" }
-      )
+      vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostics" })
     end,
   },
 
@@ -106,7 +113,6 @@ return {
     },
     config = function()
       local cmp = require("cmp")
-
       cmp.setup({
         snippet = {
           expand = function(args)
@@ -126,7 +132,7 @@ return {
         }),
         sources = {
           { name = "nvim_lsp", max_item_count = 10 },
-          { name = "luasnip", max_item_count = 5 },
+          { name = "luasnip",  max_item_count = 5 },
         },
         formatting = {
           fields = { "abbr", "kind" },
@@ -161,3 +167,4 @@ return {
     end,
   },
 }
+

@@ -1,5 +1,0 @@
-[keys.normal]
-"V" = "extend_to_line_end"
-
-[keys.normal.space]
-q = ":quit"

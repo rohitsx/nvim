@@ -17,6 +17,21 @@ c.session.lazy_restore = True
 # Clipboard access without prompting
 c.content.javascript.clipboard = 'access'
 
+# Enable webpage dark mode
+c.colors.webpage.darkmode.enabled = True
+
+# Prefer dark color scheme (important for many sites)
+c.colors.webpage.preferred_color_scheme = "dark"
+
 # Keybindings
 config.bind('<Ctrl-Shift-T>', 'undo')
 config.bind('<Ctrl-Alt-T>', 'session-load -c _autosave')
+
+# Open private (incognito) qutebrowser window
+config.bind('P', 'open -p')
+
+c.url.searchengines = {
+    "DEFAULT": "https://www.google.com/search?q={}",
+    "yt": "https://www.youtube.com/results?search_query={}",
+}
+
