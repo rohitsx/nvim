@@ -99,19 +99,4 @@ return {
       }
     end,
   },
-  {
-    'flyingshutter/gemini-autocomplete.nvim',
-
-    config = function()
-      local gemini = require 'gemini-autocomplete'
-      vim.keymap.set('n', 'Tab', gemini.toggle_enabled, { desc = '[G]emini [T]oggle Autocompletion' })
-      vim.keymap.set('n', '<leader>gg', gemini.add_gitfiles, { desc = '[G]emini add [G]itfiles' })
-      vim.keymap.set('n', '<leader>ge', gemini.edit_context, { desc = '[G]emini [E]dit Context' })
-      vim.keymap.set('n', '<leader>gp', gemini.prompt_code, { desc = '[G]emini [P]rompt Code' })
-      vim.keymap.set('n', '<leader>gc', gemini.clear_context, { desc = '[G]emini [C]lear Context' })
-      vim.keymap.set('n', '<leader>gm', gemini.choose_model, { desc = '[G]emini Choose [M]odel' })
-    end
-
-  }
-
 }
