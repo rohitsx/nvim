@@ -33,6 +33,30 @@ return {
         vim.lsp.enable(name)
       end
 
+      -- Solidity
+      setup_server("solidity_ls", {
+        capabilities = capabilities,
+        on_attach = on_attach,
+
+        root_dir = vim.fs.root(0, {
+          "foundry.toml",
+          "hardhat.config.js",
+          "hardhat.config.ts",
+          "truffle-config.js",
+          "remappings.txt",
+          ".git",
+        }),
+
+        settings = {
+          solidity = {
+            compileUsingRemoteVersion = "latest",
+            defaultCompiler = "remote",
+            enabledAsYouTypeCompilationErrorCheck = true,
+          },
+        },
+      })
+
+
       -- Lua LSP
       setup_server("lua_ls", {
         capabilities = capabilities,
@@ -79,7 +103,7 @@ return {
           tailwindCSS = {
             experimental = {
               classRegex = {
-                { "tw`([^`]*)", ".*" },
+                { "tw`([^`]*)",    ".*" },
                 { "tw%(([^)]*)%)", ".*" },
               },
             },
@@ -149,12 +173,23 @@ return {
   {
     "stevearc/conform.nvim",
     opts = {
+      formatters = {
+        prettier = {
+          command = "prettier",
+          args = {
+            "--stdin-filepath",
+            "$FILENAME",
+          },
+          stdin = true,
+        },
+      },
       formatters_by_ft = {
         typescript = { "prettier" },
         javascript = { "prettier" },
         svelte = { "prettier" },
         css = { "prettier" },
         html = { "prettier" },
+        solidity = { "prettier" }, -- fixes .sol AND .t.sol
       },
     },
     config = function(_, opts)
@@ -166,5 +201,5 @@ return {
       end, { desc = "Format file" })
     end,
   },
-}
 
+}

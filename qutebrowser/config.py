@@ -8,7 +8,7 @@ c.url.default_page = "about:blank"
 # Fonts
 c.fonts.default_family = "Fira Code"
 c.fonts.default_size = "14pt"
-c.fonts.web.size.default = 18
+c.fonts.web.size.default = 25
 
 # Session management
 c.auto_save.session = True
