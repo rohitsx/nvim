@@ -1,8 +1,6 @@
 -- This page contain list of basic nvim plugin that are good for better ui and expreince they don't directly do anything aside from making nvim more fun and beatulifuu
 
 return {
-  -- Tracks your coding activity and syncs with your WakaTime dashboard
-  { "wakatime/vim-wakatime" },
   {
     -- A statusline plugin written in Lua with rich customization
     "nvim-lualine/lualine.nvim",
@@ -99,4 +97,28 @@ return {
       }
     end,
   },
+  {
+    "OXY2DEV/markview.nvim",
+    lazy = false,
+  },
+  {
+    "kevinhwang91/nvim-ufo",
+    dependencies = {
+      "kevinhwang91/promise-async",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      vim.o.foldcolumn = "1"
+      vim.o.foldlevel = 99
+      vim.o.foldlevelstart = 99
+      vim.o.foldenable = true
+
+      require("ufo").setup({
+        provider_selector = function(_, _, _)
+          return { "treesitter", "indent" }
+        end,
+      })
+    end,
+  },
+  {"wlemuel/vim-tldr"}
 }
